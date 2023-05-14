@@ -17,11 +17,12 @@ const { body } = document;
 const canvas = document.createElement('canvas');
 canvas.id = 'canvas';
 const context = canvas.getContext('2d');
-let currentColor = '#A51DAB';
 let currentSize = 10;
-let isEraser = false;
-
 let bucketColor = '#FFFFFF';
+let currentColor = '#A51DAB';
+let isEraser = false;
+let isMouseDown = false;
+let drawnArray = [];
 
 function displayBrushSize() {
   if (brushSlider.value < 10) {
@@ -75,6 +76,38 @@ function createCanvas() {
   body.appendChild(canvas);
   switchToBrush();
 }
+
+function getMousePosition(event) {
+  const boundaries = canvas.getBoundingClientRect();
+  return {
+    x: event.clientX - boundaries.left,
+    y: event.clientY - boundaries.top,
+  };
+}
+
+canvas.addEventListener('mousedown', (event) => {
+  isMouseDown = true;
+  const currentPosition = getMousePosition(event);
+  context.moveTo(currentPosition.x, currentPosition.y);
+  context.beginPath();
+  context.lineWidth = currentSize;
+  context.lineCap = 'round';
+  context.strokeStyle = currentColor;
+});
+
+canvas.addEventListener('mousemove', (event) => {
+  if (isMouseDown) {
+    const currentPosition = getMousePosition(event);
+    context.lineTo(currentPosition.x, currentPosition.y);
+    context.stroke();
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  isMouseDown = false;
+});
+
+createCanvas();
 
 brushIcon.addEventListener('click', switchToBrush);
 createCanvas();
