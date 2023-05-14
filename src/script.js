@@ -75,28 +75,28 @@ function createCanvas() {
   switchToBrush();
 }
 
-clearCanvasBtn.addEventListener('click', () => {
+clearCanvasBtn.addEventListener("click", () => {
   createCanvas();
   drawnArray = [];
-  activeToolEl.textContent = 'Canvas Cleared';
+  activeToolEl.textContent = "Canvas Cleared";
   setTimeout(switchToBrush, 1500);
 });
 
 function restoreCanvas() {
-    for (let i = 1; i < drawnArray.length; i++) {
-      context.beginPath();
-      context.moveTo(drawnArray[i - 1].x, drawnArray[i - 1].y);
-      context.lineWidth = drawnArray[i].size;
-      context.lineCap = 'round';
-      if (drawnArray[i].eraser) {
-        context.strokeStyle = bucketColor;
-      } else {
-        context.strokeStyle = drawnArray[i].color;
-      }
-      context.lineTo(drawnArray[i].x, drawnArray[i].y);
-      context.stroke();
+  for (let i = 1; i < drawnArray.length; i++) {
+    context.beginPath();
+    context.moveTo(drawnArray[i - 1].x, drawnArray[i - 1].y);
+    context.lineWidth = drawnArray[i].size;
+    context.lineCap = "round";
+    if (drawnArray[i].eraser) {
+      context.strokeStyle = bucketColor;
+    } else {
+      context.strokeStyle = drawnArray[i].color;
     }
+    context.lineTo(drawnArray[i].x, drawnArray[i].y);
+    context.stroke();
   }
+}
 
 function storeDrawn(x, y, size, color, erase) {
   const line = {
@@ -121,6 +121,7 @@ function getMousePosition(event) {
 canvas.addEventListener("mousedown", (event) => {
   isMouseDown = true;
   const currentPosition = getMousePosition(event);
+  console.log("mouse is clicked", currentPosition);
   context.moveTo(currentPosition.x, currentPosition.y);
   context.beginPath();
   context.lineWidth = currentSize;
@@ -131,8 +132,7 @@ canvas.addEventListener("mousedown", (event) => {
 canvas.addEventListener("mousemove", (event) => {
   if (isMouseDown) {
     const currentPosition = getMousePosition(event);
-    context.lineTo(currentPosition.x, currentPosition.y);
-    context.stroke();
+    console.log("mouse is moving", currentPosition);
     context.lineTo(currentPosition.x, currentPosition.y);
     context.stroke();
     storeDrawn(
@@ -149,7 +149,45 @@ canvas.addEventListener("mousemove", (event) => {
 
 canvas.addEventListener("mouseup", () => {
   isMouseDown = false;
+  console.log("mouse is unclicked");
 });
+
+saveStorageBtn.addEventListener("click", () => {
+  localStorage.setItem("savedCanvas", JSON.stringify(drawnArray));
+
+  activeToolEl.textContent = "Canvas Saved";
+  setTimeout(switchToBrush, 1500);
+});
+
+loadStorageBtn.addEventListener("click", () => {
+  if (localStorage.getItem("savedCanvas")) {
+    drawnArray = JSON.parse(localStorage.savedCanvas);
+    restoreCanvas();
+
+    activeToolEl.textContent = "Canvas Loaded";
+    setTimeout(switchToBrush, 1500);
+  } else {
+    activeToolEl.textContent = "No Canvas Found";
+    setTimeout(switchToBrush, 1500);
+  }
+});
+
+clearStorageBtn.addEventListener("click", () => {
+  localStorage.removeItem("savedCanvas");
+
+  activeToolEl.textContent = "Local Storage Cleared";
+  setTimeout(switchToBrush, 1500);
+});
+
+downloadBtn.addEventListener("click", () => {
+  downloadBtn.href = canvas.toDataURL("image/jpeg", 1);
+  downloadBtn.download = "paint-example.jpeg";
+
+  activeToolEl.textContent = "Image File Saved";
+  setTimeout(switchToBrush, 1500);
+});
+
+brushIcon.addEventListener("click", switchToBrush);
 
 createCanvas();
 
